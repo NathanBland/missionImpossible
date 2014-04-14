@@ -1,0 +1,55 @@
+
+
+		Robotics Final Project Proposal
+
+by Malachi, David, Monica, Nathan, Joel
+
+
+
+Git Repository: 
+		To access the GitHub repository for the Robotics Final Project please visit:           
+                      https://github.com/NathanBland/missionImpossible 
+
+Methodology:
+	This proposal outlines our collective plan of action for the Robotics final project. 
+	We are outlining the steps required to complete our goal and how we aim to 
+           perform them. This includes the listing of packages we plan to use in our AR 
+           Drone program implementation as well as the division of tasks into git branches 
+           that are hosted within our github repository. (Please see above for access)
+	These tasks will be attended to by the teams outlined below in the Responsibility 
+           Assignment section of this document. The progress we plan to make iteratively 
+           as we approach our deadline is outlined in the Milestones section. In addition 
+           each week a report will be drawn up describing our actual progress and detailing 
+           any problems or hold-ups we encounter.
+
+	Git Branches: 
+		Master, Project-Proposal, Image Detection(Front camera and bottom 
+                      camera), and Pid Controller
+	Packages: 
+OpenCv, Visp, Chilitags, Zbar, and JoyController
+	
+Responsibility Assignment: 
+	Functionality for Image Detection: Joel
+	Pid Controller: David & Malachi
+	QR Code Images: Nathan & Monica
+	
+
+Milestones:
+	Week 1: April 7th, 2014 - April 14th, 2014
+		Create Project Proposal which includes individual assignment, detailing of 
+                      milestones, listing of packages utilized, and a list of branches each 
+                      specified for a component of the project.
+            Week 2: April 14th, 2014 - April 21st, 2014
+		Have achieved the functionality of detecting images. Have set up test 
+                      scenarios for the image detection software. Concurrently developing a 
+                      functional PID Controller as well as begin implementation of ZBar.
+	Week 3: April 21st, 2014 - April 28th, 2014
+Have attained the functionality of the AR Drone PID Controller. Have set 
+           up test courses to discern the functional autonomy and thereby the 
+           success of the PID Controller. Continued implementation of ZBar.
+Week 4: April 28th, 2014 - May 5th, 2014
+Have completed integration of ZBar functionality, Image detection, and a 
+           PID Controller for our AR Drone. Have completed several test courses        
+           implementing all of these features cohesively. Ready to perform final 
+           demonstration.
+	
