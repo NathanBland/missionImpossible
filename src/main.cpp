@@ -90,8 +90,6 @@ int main(int argc, char **argv) {
             QR_msg_pub.publish(QR_msg);
         }
 
-
-
         // Show captured frame, now with overlays!
         imshow("captured", frame);
 
