@@ -103,12 +103,13 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(mission_impossible
-#   src/${PROJECT_NAME}/mission_impossible.cpp
-# )
+#add_library(ardrone_controller
+#   src/${PROJECT_NAME}/ardrone_controller.cpp
+#)
 
 ## Declare a cpp executable
 # add_executable(mission_impossible_node src/mission_impossible_node.cpp)
+add_executable(ardrone_conntroller_node src/ardrone_controller.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -118,6 +119,8 @@ include_directories(
 # target_link_libraries(mission_impossible_node
 #   ${catkin_LIBRARIES}
 # )
+target_link_libraries(ardrone_conntroller_node ${catkin_LIBRARIES} )
+
 
 #############
 ## Install ##
