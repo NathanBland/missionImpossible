@@ -1,0 +1,54 @@
+<!-- This launches ardrone_autonomy, joy, and image viewer nodes -->
+
+<launch>
+
+  <node name="ardrone_driver" pkg="ardrone_autonomy" type="ardrone_driver" output="screen" clear_params="true">
+      <param name="outdoor" value="1" />
+      <param name="max_bitrate" value="4000" />
+      <param name="bitrate" value="4000" />
+      <param name="navdata_demo" value="0" />
+      <param name="flight_without_shell" value="0" />
+      <param name="altitude_max" value="3000" />
+      <param name="altitude_min" value="50" />
+      <param name="euler_angle_max" value="0.21" />
+      <param name="control_vz_max" value="700" />
+      <param name="control_yaw" value="1.75" />
+      <param name="detect_type" value="12" />
+      <param name="enemy_colors" value="2" />
+      <param name="flight_mode" value="2" />
+      <param name="detections_select_h" value="32" />
+      <param name="detections_select_v_hsync" value="128" />
+      <param name="enemy_without_shell" value="0" />
+      <param name="do_imu_caliberation" value="false" />
+      <param name="tf_prefix" value="mydrone" />
+      <!-- Covariance Values (3x3 matrices reshaped to 1x9)-->
+      <rosparam param="cov/imu_la">[0.1, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.1]</rosparam>
+      <rosparam param="cov/imu_av">[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]</rosparam>
+      <rosparam param="cov/imu_or">[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 100000.0]</rosparam>
+  </node>
+
+  <node name="joy_node" pkg="joy" type="joy_node">
+    <param name="dev" value="/dev/input/js1" />
+    <param name="deadzone" value="0.10" />
+  </node>
+
+  <node name="image_viewer" pkg="image_view" type="image_view" output="screen">
+    <remap from="image" to="ardrone/image_raw" />
+  </node>
+  
+
+  <node pkg="joystick_handler" type="joystick_handler_node" name="tele_op" output="screen">
+	<param name="linear_x" value="4" type="int"/>
+	<param name="linear_y" value="3" type="int"/>
+	<param name="linear_z" value="1" type="int"/>
+	<param name="angular_x" value="0" type="int"/>
+	<param name="angular_y" value="0" type="int"/>
+	<param name="angular_z" value="10" type="int"/>
+
+	<param name="a_scale_" value="5" type="double"/>
+	<param name="l_scale_" value="5" type="double"/>
+  </node>
+
+
+</launch>
+
