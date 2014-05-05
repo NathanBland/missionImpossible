@@ -24,6 +24,7 @@ public:
   ControlARDrone();
 
 private:
+  geometry_msgs::Twist vel;
   void joyCallback(const sensor_msgs::Joy::ConstPtr& joy);
   void navCallback(const ardrone_autonomy::Navdata::ConstPtr& nav);
   void normalCallBack(const geometry_msgs::Twist::ConstPtr& obj);
