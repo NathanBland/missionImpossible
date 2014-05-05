@@ -19,5 +19,6 @@ include_directories(
 ## Declare a cpp executable
 # add_executable(mission_impossible_node src/mission_impossible_node.cpp)
 add_executable(ardrone_conntroller_node src/ardrone_controller.cpp)
+add_executable(mission_impossible_node src/main.cpp)
 
- target_link_libraries(missinImpossible_node ${catkin_LIBRARIES} zbar)
+ target_link_libraries(mission_impossible_node ${catkin_LIBRARIES} zbar)
