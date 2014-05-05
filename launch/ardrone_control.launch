@@ -53,7 +53,7 @@
    	<param name="d" value="0.003" />
   </node>
 
-  <node name="QR_rec" pkg="mission_impossible" type="missionImpossible_node" output="screen">
+  <node name="QR_rec" pkg="mission_impossible" type="mission_impossible_node" output="screen">
 
   </node>
 

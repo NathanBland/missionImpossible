@@ -127,6 +127,7 @@ void ControlARDrone::normalCallBack(const geometry_msgs::Twist::ConstPtr& obj){
 }
 
 void ControlARDrone::QRCallBack(const std_msgs::String::ConstPtr& command){
+    geometry_msgs::Twist vel;
     if(droneState != 2){
         droneState = 2;
         QR_msg = command->data;
