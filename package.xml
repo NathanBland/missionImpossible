@@ -1,23 +1,13 @@
 <?xml version="1.0"?>
 <package>
-<<<<<<< .merge_file_bGxhnY
-  <name>missionImpossible</name>
-  <version>0.0.0</version>
-  <description>The missionImpossible package</description>
-=======
   <name>mission_impossible</name>
   <version>0.0.0</version>
   <description>The mission_impossible package</description>
->>>>>>> .merge_file_oWBulU
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-<<<<<<< .merge_file_bGxhnY
-  <maintainer email="joel@todo.todo">joel</maintainer>
-=======
   <maintainer email="ubuntu@todo.todo">ubuntu</maintainer>
->>>>>>> .merge_file_oWBulU
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -29,11 +19,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-<<<<<<< .merge_file_bGxhnY
-  <!-- <url type="website">http://wiki.ros.org/missionImpossible</url> -->
-=======
   <!-- <url type="website">http://wiki.ros.org/mission_impossible</url> -->
->>>>>>> .merge_file_oWBulU
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->

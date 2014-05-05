@@ -4,12 +4,20 @@
 #include <zbar.h>
 #include <iostream>
 #include <iomanip>
+#include <ros/publisher.h>
+#include <std_msgs/String.h>
+#include <ros/node_handle.h>
 
 using namespace std;
 using namespace cv;
 using namespace zbar;
 
 int main(int argc, char **argv) {
+    ros::init(argc, argv, "missinImpossible");
+    ros::NodeHandle nh_;
+
+    ros::Publisher QR_msg_pub = nh_.advertise<std_msgs::String>("/QR_msg", 10);
+    std_msgs::String QR_msg;
     int cam_idx = 0;
 
     if (argc == 2) {
@@ -78,6 +86,8 @@ int main(int argc, char **argv) {
             }
             cout    <<"Angle: "   << r.angle << endl
                     << " symbol " << symbol->get_data() << endl;
+            QR_msg.data = symbol->get_data();
+            QR_msg_pub.publish(QR_msg);
         }
 
         // Show captured frame, now with overlays!

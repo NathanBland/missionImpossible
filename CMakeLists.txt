@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(missionImpossible)
+project(mission_impossible)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS roscpp  sensor_msgs image_transport cv_bridge)
@@ -17,7 +17,7 @@ include_directories(
 
 
 ## Declare a cpp executable
-# add_executable(missinImpossible_node src/missinImpossible.cpp)
- add_executable(missinImpossible_node src/main.cpp)
+# add_executable(mission_impossible_node src/mission_impossible_node.cpp)
+add_executable(ardrone_conntroller_node src/ardrone_controller.cpp)
 
  target_link_libraries(missinImpossible_node ${catkin_LIBRARIES} zbar)
