@@ -104,26 +104,16 @@ void ControlARDrone::normalCallBack(const geometry_msgs::Twist::ConstPtr& obj){
     double y = obj->linear.y;
     double z = obj->linear.z;
     double scale= .1;
-    if (x < 28 && x > 22 && y < 120 && y > 80 &&  z < 5 && z > 3){
+    if (x < 10 && x > -10 && y < 10 && y > -10 &&  z < 275 && z > 300){
         droneState = 3;
     }
     if (droneState == 2) {
-        if(x < 25){
-            vel.linear.z = scale*(25 - x)/25;
-        }
-        if(x > 25) {
-            vel.linear.z = -scale*abs(25 - x)/25;
-        }if(y < 100){
-            vel.linear.y= scale*(100 - y)/100;
-        }
-        if(y > 100){
-            vel.linear.y= -scale*abs(100 - y)/100;
-        }
-        if (z < 3){
-            vel.linear.x = scale*abs(3 - z)/3;
-        }
-        if (z > 5){
-            vel.linear.x = -scale*abs(z - 4)/4;
+        vel.linear.z = scale*(x)/75;
+        vel.linear.y= scale*y/75;
+        if(z > 300){
+            vel.linear.x =scale*(300-z)/300;
+        } else {
+            vel.linear.x = scale*z/300;
         }
         vel_pub_.publish(vel);
     }
@@ -152,7 +142,7 @@ void ControlARDrone::QRCallBack(const std_msgs::String::ConstPtr& command){
 void ControlARDrone::navCallback(const ardrone_autonomy::Navdata::ConstPtr& nav){
     geometry_msgs::Twist vel;
     height = nav->altd;
-    cout << droneState << endl;
+    //cout << droneState << endl;
     if(nav->tags_count >0){
         orientation = nav->tags_orientation[0];
     }
