@@ -5,19 +5,11 @@
 #include <ros/node_handle.h>
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/objdetect/objdetect.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/ml/ml.hpp>
-#include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
-#include <opencv2/objdetect/objdetect.hpp>
-#include <geometry_msgs/Twist.h>
 #include <zbar.h>
 #include <ros/ros.h>
 #include <std_msgs/Float32.h>
 #include <memory>
-#include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
@@ -61,15 +53,12 @@ public:
         }
     }
 
-    bool fileExists(const std::string& fname)
-    {
+    bool fileExists(const std::string& fname){
       std::ifstream f(fname.c_str());
-      if(f.good())
-      {
+      if(f.good()){
         f.close();
         return true;
-      } else
-      {
+      } else{
         f.close();
         return false;
       }
@@ -84,7 +73,37 @@ public:
             ROS_ERROR("cv_bridge exception: %s", e.what());
             return;
         }
-        Mat frame = cv_ptr->image;
+        Mat frame = cv_ptr->image, frame_grayscale;
+
+        /////////////////////////////////////////QR Code scanner ////////////////////////////////////////////////////
+        ImageScanner scanner;
+        scanner.set_config(ZBAR_NONE, ZBAR_CFG_ENABLE, 1);
+
+        // Convert to grayscale
+        cvtColor(frame, frame_grayscale, CV_BGR2GRAY);
+
+        // Obtain image data
+        int width = frame_grayscale.cols;
+        int height = frame_grayscale.rows;
+        uchar *raw = (uchar *)(frame_grayscale.data);
+
+        // Wrap image data
+        Image image(width, height, "Y800", raw, width * height);
+
+        // Scan the image for barcodes
+        //int n = scanner.scan(image);
+        scanner.scan(image);
+
+        // Extract results
+        for (Image::SymbolIterator symbol = image.symbol_begin(); symbol != image.symbol_end(); ++symbol) {
+            std_msgs::String QR_msg;
+            QR_msg.data = symbol->get_data();
+            message.publish(QR_msg);
+        }
+
+/////////////////////////////////////////QR Code scanner ////////////////////////////////////////////////////
+
+/////////////////////////////////////////color finder////////////////////////////////////////////////////
 
         cv::resize(cv_ptr->image, frame, cv::Size(0,0), 0.25, 0.25);
         cv::Mat vectorizedFrame = frame.reshape(1, frame.rows*frame.cols);
@@ -100,6 +119,7 @@ public:
         std::vector<std::vector<cv::Point> > contours;
         std::vector<cv::Vec4i> hierarchy;
         cv::findContours(labeli, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+
         if(contours.size() <= 0){
             ROS_WARN("Nothing detected!!");
             return;
@@ -115,10 +135,15 @@ public:
 
             }
         }
+
         cv::Moments mu = cv::moments(contours.at(bigIdx));
         cv::Point2f paper = cv::Point2f( mu.m10/mu.m00 , mu.m01/mu.m00 );
         cv::Point2f distance = cv::Point2f( (msg->height/2)-paper.x, (msg->width/2)-paper.y);
 
+        /////////////////////////////////////////color finder////////////////////////////////////////////////////
+
+
+        //publishing the locations
         if(!(isnan(distance.x) || isnan(distance.y))){
             geometry_msgs::Twist t;
             t.linear.x = distance.x;
@@ -129,13 +154,7 @@ public:
 
     }
 
-    cv::Point2f detectModel(const sensor_msgs::ImageConstPtr& msg, bool sphero){
-
-
-    }
-
 private:
-
 };
 
 
