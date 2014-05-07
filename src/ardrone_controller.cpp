@@ -64,7 +64,7 @@ private:
 
 ControlARDrone::ControlARDrone() {
   linear_x = 4; linear_y=3; linear_z=1; angular_x=0; angular_y=0; angular_z=0;
-  a_scale_= 4.0; l_scale_= 4.0; auto_on = false; droneState = -1; flying = false;
+  a_scale_= 4.0; l_scale_= 4.0; auto_on = false; droneState = 2; flying = false;
   nh_.param("axis_linearx", linear_x, linear_x);
   nh_.param("axis_lineary", linear_y, linear_y);
   nh_.param("axis_linearz", linear_z, linear_z);
@@ -104,21 +104,23 @@ void ControlARDrone::normalCallBack(const geometry_msgs::Twist::ConstPtr& obj){
     double y = obj->linear.y;
     double z = obj->linear.z;
     double scale= .1;
-    if (x < 10 && x > -10 && y < 10 && y > -10 &&  z < 275 && z > 300){
+    if (x < 50 && x > -50 && y < 50 && y > -50 &&  z > 300 && z < 4000){
         droneState = 3;
+        cout << 3;
     }
     if (droneState == 2) {
         vel.linear.z = scale*(x)/75;
         vel.linear.y= scale*y/75;
         if(z > 300){
-            vel.linear.x =scale*(300-z)/300;
+            vel.linear.x =scale*(1000-z)/1000;
         } else {
-            vel.linear.x = scale*z/300;
+            vel.linear.x = scale*z/1000;
         }
         vel_pub_.publish(vel);
     }
     if (droneState == 6){
         droneState = 2;
+        cout << 2;
     }
 }
 
@@ -171,7 +173,7 @@ void ControlARDrone::navCallback(const ardrone_autonomy::Navdata::ConstPtr& nav)
         vel_pub_.publish(vel);
     }
     if(droneState == 5 && nav->tags_count > 0){
-        if (orientation > 180){
+        if (orientation > 180){cout << 3;
             vel.angular.z = -.5;
         }else{
             vel.angular.z = .5;
@@ -186,7 +188,7 @@ void ControlARDrone::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 {
     geometry_msgs::Twist vel;
     if(joy->buttons[0]&&!hold_a){
-        droneState = 1;
+        droneState = 2;
         cout << droneState << endl;
         hold_a=true;
     }else if(joy->buttons[0]==0){hold_a=false;}
@@ -213,6 +215,7 @@ void ControlARDrone::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
     if(joy->buttons[4]&&!hold_rbump){
         ar_land.publish(empty_msg);
         droneState = -1;
+        cout << -1;
         hold_rbump=true;
     }else if(joy->buttons[4]==0){hold_rbump=false;}
 
@@ -226,6 +229,7 @@ void ControlARDrone::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
         ar_reset.publish(empty_msg);
         hold_reset=true;
         droneState = -1;
+        cout << -1;
         auto_on = false;
         flying = false;
     }else if(joy->buttons[6]==0){hold_reset=false;}
