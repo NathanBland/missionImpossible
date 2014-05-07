@@ -33,8 +33,9 @@ private:
   ros::NodeHandle nh_;
 
   bool hold_a, hold_b, hold_x, hold_y, hold_lbump, hold_rbump, hold_start, hold_reset, hold_xbox, auto_on, flying;
-  int linear_x, linear_y, linear_z, angular_x, angular_y, angular_z, buttoncount, height;
-  int droneState; // -1 == user control, 0 == searching, 1 == start up, 2 == positioning
+  int linear_x, linear_y, linear_z, angular_x, angular_y, angular_z, buttoncount, height, height_expect, orientation;
+  int droneState; // -1 == user control, 0 == searching, 1 == start up, 2 == positioning, 3 == find the correct action, 5 == orient over a tag
+                  // 6 == move foward and check for a tag, 7 adjust height.
   double l_scale_, a_scale_, p, lastXPos, lastYPos, lastZPos;
   string QR_msg;
   ros::Time timeOfLastCycle;
@@ -86,9 +87,8 @@ ControlARDrone::ControlARDrone() {
 
   joy_sub_ = nh_.subscribe<sensor_msgs::Joy>("joy", 100, &ControlARDrone::joyCallback, this);
   tag_sub = nh_.subscribe<ardrone_autonomy::Navdata>("/ardrone/navdata", 5, &ControlARDrone::navCallback, this);
-  //norm_sub = nh_.subscribe<geometry_msgs::Twist>("/normalModeling/obj_loc", 1000, &ControlARDrone::normalCallBack, this);
   norm_sub = nh_.subscribe<geometry_msgs::Twist>("/QR_twist", 10, &ControlARDrone::normalCallBack, this);
-  QR_sub = nh_.subscribe<std_msgs::String>("/QR_msg", 10, &ControlARDrone::QRCallBack, this);
+  QR_sub = nh_.subscribe<std_msgs::String>("/QR_mgs", 10, &ControlARDrone::QRCallBack, this);
 }
 
 void ControlARDrone::startUp() {
@@ -102,71 +102,91 @@ void ControlARDrone::normalCallBack(const geometry_msgs::Twist::ConstPtr& obj){
     double x = obj->linear.x;
     double y = obj->linear.y;
     double z = obj->linear.z;
-    double scale= .04;
+    double scale= .1;
+    if (x < 28 && x > 22 && y < 120 && y > 80 &&  z < 5 && z > 3){
+        droneState = 3;
+    }
     if (droneState == 2) {
-        if(x < 0){
-            vel.linear.y = scale*(100 - x)/100;
+        if(x < 25){
+            vel.linear.z = scale*(25 - x)/25;
         }
-        if(x > 0) {
-            vel.linear.y = -scale*abs(100 - x)/100;
-        }if(y < 0){
-            vel.linear.z= scale* (100 - y)/100;
+        if(x > 25) {
+            vel.linear.z = -scale*abs(25 - x)/25;
+        }if(y < 100){
+            vel.linear.y= scale*(100 - y)/100;
         }
-        if(y > 0){
-            vel.linear.z= -scale*abs(100 - y)/100;
+        if(y > 100){
+            vel.linear.y= -scale*abs(100 - y)/100;
         }
-        if (z < 3000){
-            vel.linear.x = scale*abs(3000 - z)/3000;
+        if (z < 3){
+            vel.linear.x = scale*abs(3 - z)/3;
         }
-        if (z > 6000){
-            vel.linear.x = scale*abs(z - 6000)/6000;
+        if (z > 5){
+            vel.linear.x = -scale*abs(z - 4)/4;
         }
         vel_pub_.publish(vel);
+    }
+    if (droneState == 6){
+        droneState = 2;
     }
 }
 
 void ControlARDrone::QRCallBack(const std_msgs::String::ConstPtr& command){
-    if(droneState != 2){
-        droneState = 2;
-        QR_msg = command->data;
-        ar_land.publish(empty_msg);
+    QR_msg = command->data;
+    if(droneState == 3){
+        if (command->data == "left"){
+            droneState = 5;
+        } else if(command->data == "right") {
+            droneState = 5;
+        }else if(command->data == "take off") {
+            ar_launch.publish(empty_msg);
+        }else if(command->data == "land" || command->data == "stop") {
+            ar_land.publish(empty_msg);
+            droneState = -1;
+        }
     }
-
-    if (command->data == "left"){
-        vel.angular.z = 30;
-    } else if(command->data == "right") {
-        vel.angular.z = -30;
-    }else if(command->data == "take off") {
-        ar_launch.publish(empty_msg);
-    }else if(command->data == "land") {
-        ar_land.publish(empty_msg);
-    }
-    vel_pub_.publish(vel);
-    droneState=-1;
 }
 
 void ControlARDrone::navCallback(const ardrone_autonomy::Navdata::ConstPtr& nav){
     geometry_msgs::Twist vel;
     height = nav->altd;
+    cout << droneState << endl;
+    if(nav->tags_count >0){
+        orientation = nav->tags_orientation[0];
+    }
     if (droneState == 1){
         if(!flying){
             ar_launch.publish(empty_msg);
             flying = true;
         }
-        if(height < 1200 || height > 1400){
-            if (height > 1400){
-                vel.linear.z = -.5;
+        if(height < 1400 || height > 1500){
+            if (height > 1500){
+                vel.linear.z = -.2;
             }else{
-                vel.linear.z = .5;
+                vel.linear.z = .2;
             }
             vel_pub_.publish(vel);
         }else{
-            droneState = 0;
+            droneState = 2;
         }
     }
     if(droneState == 0) {
         vel.angular.z = -.2;
         vel_pub_.publish(vel);
+    }
+    if(droneState == 6){
+        vel.linear.x = .5;
+        vel_pub_.publish(vel);
+    }
+    if(droneState == 5 && nav->tags_count > 0){
+        if (orientation > 180){
+            vel.angular.z = -.5;
+        }else{
+            vel.angular.z = .5;
+        }
+        if (orientation == 0){
+            droneState = 6;
+        }
     }
 }
 
@@ -180,8 +200,6 @@ void ControlARDrone::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
     }else if(joy->buttons[0]==0){hold_a=false;}
 
     if(joy->buttons[1]&&!hold_b){
-        vel.angular.z = 30;
-        vel_pub_.publish(vel);
         hold_b=true;
     }else if(joy->buttons[1]==0){hold_b=false;}
 /*
@@ -208,6 +226,7 @@ void ControlARDrone::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 
     if(joy->buttons[5]&&!hold_lbump){
         ar_launch.publish(empty_msg);
+        flying = true;
         hold_lbump=true;
     }else if(joy->buttons[5]==0){hold_lbump=false;}
 
@@ -216,6 +235,7 @@ void ControlARDrone::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
         hold_reset=true;
         droneState = -1;
         auto_on = false;
+        flying = false;
     }else if(joy->buttons[6]==0){hold_reset=false;}
 
     if(joy->buttons[7]&&!hold_start){
@@ -242,7 +262,7 @@ void ControlARDrone::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
       vel.linear.x = 3*joy->axes[linear_x];
       vel.linear.y = 3*joy->axes[linear_y];
       vel.linear.z = 3*joy->axes[linear_z];
-      //vel.angular.z = 3*joy->axes[angular_z];
+      vel.angular.z = 3*joy->axes[angular_z];
       vel_pub_.publish(vel);
   //}
 }
