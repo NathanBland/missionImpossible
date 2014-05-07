@@ -91,7 +91,6 @@ public:
         Image image(width, height, "Y800", raw, width * height);
 
         // Scan the image for barcodes
-        //int n = scanner.scan(image);
         scanner.scan(image);
 
         // Extract results
@@ -105,26 +104,31 @@ public:
 
 /////////////////////////////////////////color finder////////////////////////////////////////////////////
 
+        //get all the mats ready to be used to detect
         cv::resize(cv_ptr->image, frame, cv::Size(0,0), 0.25, 0.25);
         cv::Mat vectorizedFrame = frame.reshape(1, frame.rows*frame.cols);
-        cv::Mat testf, labelf;
+        cv::Mat testf, labelf,labeli;
+
+        //resize and change colors on the mats
         vectorizedFrame.convertTo(testf, CV_32FC1, 1.0/255.0, 1.0);
         paperClassifier.predict(testf, &labelf);
         labelf = labelf.reshape(1, frame.rows);
         cv::dilate(labelf, labelf, cv::Mat::ones(3,3, CV_32FC1), cv::Point(-1,-1), 2);
         cv::erode(labelf, labelf, cv::Mat::ones(3,3, CV_32FC1), cv::Point(-1,-1), 2);
-        // find the centroid of the largest blob
-        cv::Mat labeli;
         labelf.convertTo(labeli, CV_8UC1);
+
+        // find the centroid of the largest blob
         std::vector<std::vector<cv::Point> > contours;
         std::vector<cv::Vec4i> hierarchy;
         cv::findContours(labeli, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
+        // make sure something was found
         if(contours.size() <= 0){
             ROS_WARN("Nothing detected!!");
             return;
         }
-          // look for largest blob
+
+        // look for largest blob
         size_t bigIdx = 0;
         double contourArea = 0.0;
         for(size_t ii = 0; ii < contours.size(); ii++){
@@ -135,10 +139,10 @@ public:
 
             }
         }
-
+        // find the distance to the center of the screen
         cv::Moments mu = cv::moments(contours.at(bigIdx));
         cv::Point2f paper = cv::Point2f( mu.m10/mu.m00 , mu.m01/mu.m00 );
-        cv::Point2f distance = cv::Point2f( (msg->height/2)-paper.x, (msg->width/2)-paper.y);
+        cv::Point2f distance = cv::Point2f( (labeli.cols/2)-paper.x, (labeli.rows/2)-paper.y);
 
         /////////////////////////////////////////color finder////////////////////////////////////////////////////
 
@@ -148,7 +152,7 @@ public:
             geometry_msgs::Twist t;
             t.linear.x = distance.x;
             t.linear.y = distance.y;
-            //sleep(1);
+            t.linear.z = contourArea;
             loc.publish(t);
         }
 

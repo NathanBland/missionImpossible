@@ -54,9 +54,8 @@
   </node>
 
   <node name="QR_rec" pkg="mission_impossible" type="mission_impossible_node" output="screen">
-
+    <param name="paperModel" value="$(find runner_sphero)/paper.yml" />
   </node>
-
 
 </launch>
 
